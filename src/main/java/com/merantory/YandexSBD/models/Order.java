@@ -1,8 +1,5 @@
 package com.merantory.YandexSBD.models;
 
-import com.merantory.YandexSBD.util.validators.TimeInterval;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
