@@ -1,6 +1,6 @@
-package com.merantory.YandexSBD.util.exceptions;
+package com.merantory.YandexSBD.util.exceptions.order;
 
-public class OrderNotFoundException extends RuntimeException{
+public class OrderNotFoundException extends OrderMainException {
     public OrderNotFoundException(String msg) {
         super(msg);
     }
