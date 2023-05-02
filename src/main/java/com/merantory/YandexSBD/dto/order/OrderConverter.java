@@ -10,7 +10,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class OrderConverter {
+public final class OrderConverter {
+
+    private OrderConverter() {
+        throw new AssertionError();
+    }
 
     public static List<OrderDto> convertOrderListToOrderDtoList(List<Order> orders) {
         List<OrderDto> orderDtoList = new ArrayList<>();
