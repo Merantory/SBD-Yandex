@@ -11,7 +11,12 @@ import org.modelmapper.TypeMap;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CourierConverter {
+public final class CourierConverter {
+
+    private CourierConverter() {
+        throw new AssertionError();
+    }
+
     public static List<CourierDto> convertCourierListToCourierDtoList(List<Courier> courierList) {
         List<CourierDto> courierDtoList = new ArrayList<>();
         for (Courier courier : courierList) {
