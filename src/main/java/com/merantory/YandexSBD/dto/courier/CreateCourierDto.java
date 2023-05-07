@@ -1,7 +1,7 @@
 package com.merantory.YandexSBD.dto.courier;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.merantory.YandexSBD.models.CourierType;
+import com.merantory.YandexSBD.models.CourierTypeEnum;
 import com.merantory.YandexSBD.util.validators.TimeInterval;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
@@ -16,9 +16,10 @@ import java.util.Set;
 @Setter
 public class CreateCourierDto {
     @JsonProperty("courier_type")
-    private CourierType courierType;
+    private CourierTypeEnum courierType;
 
     @NotEmpty(message = "should not be empty")
+    @JsonProperty("regions")
     private Set<@Positive(message = "values should be positive") Long> regions;
 
     @JsonProperty("working_hours")
