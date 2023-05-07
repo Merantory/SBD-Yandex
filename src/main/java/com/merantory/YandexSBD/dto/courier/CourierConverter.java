@@ -7,9 +7,13 @@ import com.merantory.YandexSBD.models.CourierTypeEnum;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
+import org.modelmapper.spi.MatchingStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.modelmapper.convention.MatchingStrategies.STANDARD;
+import static org.modelmapper.convention.MatchingStrategies.STRICT;
 
 public final class CourierConverter {
 
@@ -51,6 +55,9 @@ public final class CourierConverter {
         Converter<CourierTypeEnum, CourierType> TypeEnumToCourierType = c -> new CourierType(c.getSource());
 
         ModelMapper modelMapper = new ModelMapper();
+        // Set matching strategy from default STANDARD to STRICT for more accurate mappings including courierType
+        modelMapper.getConfiguration().setMatchingStrategy(STRICT);
+
         TypeMap<CreateCourierDto, Courier> propertyMapper = modelMapper.createTypeMap(CreateCourierDto.class, Courier.class);
 
         propertyMapper.addMappings(mapper -> mapper.using(TypeEnumToCourierType)
