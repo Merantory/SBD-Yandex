@@ -7,10 +7,7 @@ import com.merantory.YandexSBD.services.OrderService;
 import com.merantory.YandexSBD.util.exceptions.order.OrderInvalidRequestParamsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -38,5 +35,12 @@ public class OrderController {
         List<OrderDto> ordersDtoList = OrderConverter.convertOrderListToOrderDtoList(orderList);
 
         return ordersDtoList;
+    }
+
+    @GetMapping("/{order_id}")
+    public OrderDto getOrder(@PathVariable("order_id") long orderId) {
+        Order order = orderService.getOrder(orderId);
+        OrderDto responseOrder = OrderConverter.convertOrderToOrderDto(order);
+        return responseOrder;
     }
 }
