@@ -2,6 +2,7 @@ package com.merantory.YandexSBD.controllers;
 
 import com.merantory.YandexSBD.dto.order.OrderConverter;
 import com.merantory.YandexSBD.dto.order.OrderDto;
+import com.merantory.YandexSBD.dto.order.requests.RequestCompleteOrderDto;
 import com.merantory.YandexSBD.dto.order.requests.RequestCreateOrder;
 import com.merantory.YandexSBD.models.Order;
 import com.merantory.YandexSBD.services.OrderService;
@@ -54,5 +55,15 @@ public class OrderController {
         orderService.save(orderToSaveList);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/complete")
+    public ResponseEntity<List<OrderDto>> markOrderAsCompleted(@RequestBody @Valid RequestCompleteOrderDto requestCompleteOrderDto) {
+        List<Order> completedOrder = OrderConverter.convertCompleteOrderDtoListToOrderList(
+                requestCompleteOrderDto.completeOrderDto());
+        List<OrderDto> orderDtoList = OrderConverter.convertOrderListToOrderDtoList(
+                orderService.markAsCompleted(completedOrder));
+
+        return new ResponseEntity<>(orderDtoList, HttpStatus.OK);
     }
 }
