@@ -1,11 +1,42 @@
 package com.merantory.YandexSBD.controllers;
 
+import com.merantory.YandexSBD.dto.order.OrderConverter;
+import com.merantory.YandexSBD.dto.order.OrderDto;
+import com.merantory.YandexSBD.models.Order;
+import com.merantory.YandexSBD.services.OrderService;
+import com.merantory.YandexSBD.util.exceptions.order.OrderInvalidRequestParamsException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Validated
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
+    private final OrderService orderService;
+
+    @Autowired
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @GetMapping
+    public List<OrderDto> getOrdersList(@RequestParam(value = "offset", defaultValue = "0") int offset,
+                                        @RequestParam(value = "limit", defaultValue = "1") int limit) {
+
+        if (offset < 0 || limit < 1) {
+            String errorMessage = "Invalid query params given. offset = " + offset + " limit = " + limit;
+            throw new OrderInvalidRequestParamsException(errorMessage);
+        }
+
+        List<Order> orderList = orderService.getOrdersList(offset, limit);
+        List<OrderDto> ordersDtoList = OrderConverter.convertOrderListToOrderDtoList(orderList);
+
+        return ordersDtoList;
+    }
 }
