@@ -2,10 +2,14 @@ package com.merantory.YandexSBD.controllers;
 
 import com.merantory.YandexSBD.dto.order.OrderConverter;
 import com.merantory.YandexSBD.dto.order.OrderDto;
+import com.merantory.YandexSBD.dto.order.requests.RequestCreateOrder;
 import com.merantory.YandexSBD.models.Order;
 import com.merantory.YandexSBD.services.OrderService;
 import com.merantory.YandexSBD.util.exceptions.order.OrderInvalidRequestParamsException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,5 +46,13 @@ public class OrderController {
         Order order = orderService.getOrder(orderId);
         OrderDto responseOrder = OrderConverter.convertOrderToOrderDto(order);
         return responseOrder;
+    }
+
+    @PostMapping
+    public ResponseEntity<HttpStatus> saveOrder(@RequestBody @Valid RequestCreateOrder requestCreateOrder) {
+        List<Order> orderToSaveList = OrderConverter.convertCreateOrderDtoListToOrderList(requestCreateOrder.orders());
+        orderService.save(orderToSaveList);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
