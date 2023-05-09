@@ -196,4 +196,25 @@ class OrderControllerTest {
 
         verify(orderService, times(1)).markAsCompleted(anyList());
     }
+
+    @Test
+    public void markInvalidOrderAsCompletedTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
+        CompleteOrderDto completeOrderDto = new CompleteOrderDto();
+        completeOrderDto.setOrderId(-1L); // Invalid params
+        completeOrderDto.setCourierId(1L);
+        Instant instant = Instant.now();
+        completeOrderDto.setCompleteTime(instant);
+
+        RequestCompleteOrderDto requestCompleteOrderDto = new RequestCompleteOrderDto(List.of(completeOrderDto));
+
+        mockMvc.perform(post("/orders/complete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestCompleteOrderDto)))
+                .andExpect(status().isBadRequest());
+
+        verify(orderService, times(0)).markAsCompleted(anyList());
+    }
 }
