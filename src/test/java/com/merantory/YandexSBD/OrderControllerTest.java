@@ -1,7 +1,10 @@
 package com.merantory.YandexSBD;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.merantory.YandexSBD.controllers.CustomGlobalExceptionHandler;
 import com.merantory.YandexSBD.controllers.OrderController;
+import com.merantory.YandexSBD.dto.order.CreateOrderDto;
+import com.merantory.YandexSBD.dto.order.requests.RequestCreateOrder;
 import com.merantory.YandexSBD.models.Order;
 import com.merantory.YandexSBD.services.OrderService;
 import com.merantory.YandexSBD.util.exceptions.order.OrderInvalidRequestParamsException;
@@ -19,10 +22,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -104,5 +110,26 @@ class OrderControllerTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof OrderNotFoundException));
 
         verify(orderService, times(1)).getOrder(1L);
+    }
+
+    @Test
+    public void saveOrderTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        CreateOrderDto createOrderDto = new CreateOrderDto();
+        createOrderDto.setWeight(10);
+        createOrderDto.setRegions(1L);
+        createOrderDto.setDeliveryHours(List.of("10:00-12:00"));
+        createOrderDto.setCost(100);
+        RequestCreateOrder requestCreateOrder = new RequestCreateOrder(List.of(createOrderDto));
+
+        doNothing().when(orderService).save(anyList());
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestCreateOrder))) // Write requestCreateOrder as JSON
+                .andExpect(status().isCreated());
+
+        verify(orderService, times(1)).save(anyList());
     }
 }
