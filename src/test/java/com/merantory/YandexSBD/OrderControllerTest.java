@@ -1,9 +1,13 @@
 package com.merantory.YandexSBD;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.merantory.YandexSBD.controllers.CustomGlobalExceptionHandler;
 import com.merantory.YandexSBD.controllers.OrderController;
+import com.merantory.YandexSBD.dto.order.CompleteOrderDto;
 import com.merantory.YandexSBD.dto.order.CreateOrderDto;
+import com.merantory.YandexSBD.dto.order.OrderDto;
+import com.merantory.YandexSBD.dto.order.requests.RequestCompleteOrderDto;
 import com.merantory.YandexSBD.dto.order.requests.RequestCreateOrder;
 import com.merantory.YandexSBD.models.Order;
 import com.merantory.YandexSBD.services.OrderService;
@@ -22,6 +26,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -152,5 +158,42 @@ class OrderControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(orderService, times(0)).save(anyList());
+    }
+
+    @Test
+    public void markOrderAsCompletedTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
+        CompleteOrderDto completeOrderDto = new CompleteOrderDto();
+        completeOrderDto.setOrderId(1L);
+        completeOrderDto.setCourierId(1L);
+        Instant instant = Instant.now();
+        completeOrderDto.setCompleteTime(instant);
+
+        Order returnCompletedOrder = new Order();
+        returnCompletedOrder.setId(1L);
+        returnCompletedOrder.setDeliveryCourierId(1L);
+        returnCompletedOrder.setCompletedTime(instant);
+
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(returnCompletedOrder);
+
+        RequestCompleteOrderDto requestCompleteOrderDto = new RequestCompleteOrderDto(List.of(completeOrderDto));
+
+        OrderDto resultOrder = new OrderDto();
+        resultOrder.setId(1L);
+        resultOrder.setCompletedTime(instant);
+
+        doReturn(orderList).when(orderService).markAsCompleted(anyList());
+
+        mockMvc.perform(post("/orders/complete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestCompleteOrderDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$..order_id").value((int) resultOrder.getId()))
+                .andExpect(jsonPath("$..completed_time").isArray());
+
+        verify(orderService, times(1)).markAsCompleted(anyList());
     }
 }
