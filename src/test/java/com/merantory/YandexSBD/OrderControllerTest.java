@@ -2,6 +2,7 @@ package com.merantory.YandexSBD;
 
 import com.merantory.YandexSBD.controllers.CustomGlobalExceptionHandler;
 import com.merantory.YandexSBD.controllers.OrderController;
+import com.merantory.YandexSBD.models.Order;
 import com.merantory.YandexSBD.services.OrderService;
 import com.merantory.YandexSBD.util.exceptions.order.OrderInvalidRequestParamsException;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,10 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -72,5 +73,24 @@ class OrderControllerTest {
 
         // getOrderList shouldn't be called
         verify(orderService, times(0)).getOrdersList(anyInt(), anyInt());
+    }
+
+    @Test
+    public void getOrderTest() throws Exception {
+        // Create Order object for service return
+        Order order = new Order();
+        order.setId(1L);
+
+        // Mock getOrder call in orderService
+        when(orderService.getOrder(anyLong())).thenReturn(order);
+
+        // Execute GET-request for following URL "/orders/{order_id}"
+        mockMvc.perform(get("/orders/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.order_id").value(1L));
+
+        // Check, that method getOrder was called once with expected orderId
+        verify(orderService, times(1)).getOrder(1L);
     }
 }
