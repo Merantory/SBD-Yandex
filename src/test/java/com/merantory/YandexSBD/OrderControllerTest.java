@@ -5,6 +5,7 @@ import com.merantory.YandexSBD.controllers.OrderController;
 import com.merantory.YandexSBD.models.Order;
 import com.merantory.YandexSBD.services.OrderService;
 import com.merantory.YandexSBD.util.exceptions.order.OrderInvalidRequestParamsException;
+import com.merantory.YandexSBD.util.exceptions.order.OrderNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -91,6 +92,17 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.order_id").value(1L));
 
         // Check, that method getOrder was called once with expected orderId
+        verify(orderService, times(1)).getOrder(1L);
+    }
+
+    @Test
+    public void getNotExistOrderTest() throws Exception {
+        when(orderService.getOrder(anyLong())).thenThrow(OrderNotFoundException.class);
+
+        mockMvc.perform(get("/orders/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof OrderNotFoundException));
+
         verify(orderService, times(1)).getOrder(1L);
     }
 }
