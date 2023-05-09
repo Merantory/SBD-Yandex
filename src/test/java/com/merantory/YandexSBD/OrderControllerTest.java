@@ -132,4 +132,25 @@ class OrderControllerTest {
 
         verify(orderService, times(1)).save(anyList());
     }
+
+    @Test
+    public void saveInvalidOrderTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        CreateOrderDto createOrderDto = new CreateOrderDto();
+        createOrderDto.setWeight(-10); // Invalid value for save
+        createOrderDto.setRegions(1L);
+        createOrderDto.setDeliveryHours(List.of("10:00-12:00"));
+        createOrderDto.setCost(100);
+        RequestCreateOrder requestCreateOrder = new RequestCreateOrder(List.of(createOrderDto));
+
+        doNothing().when(orderService).save(anyList());
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestCreateOrder))) // Write requestCreateOrder as JSON
+                .andExpect(status().isBadRequest());
+
+        verify(orderService, times(0)).save(anyList());
+    }
 }
