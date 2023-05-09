@@ -1,18 +1,9 @@
 package com.merantory.YandexSBD;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.merantory.YandexSBD.controllers.CustomGlobalExceptionHandler;
 import com.merantory.YandexSBD.controllers.OrderController;
-import com.merantory.YandexSBD.dto.order.CompleteOrderDto;
-import com.merantory.YandexSBD.dto.order.CreateOrderDto;
-import com.merantory.YandexSBD.dto.order.OrderDto;
-import com.merantory.YandexSBD.dto.order.requests.RequestCompleteOrderDto;
-import com.merantory.YandexSBD.dto.order.requests.RequestCreateOrder;
-import com.merantory.YandexSBD.models.Order;
 import com.merantory.YandexSBD.services.OrderService;
 import com.merantory.YandexSBD.util.exceptions.order.OrderInvalidRequestParamsException;
-import com.merantory.YandexSBD.util.exceptions.order.OrderNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -26,16 +17,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -68,5 +54,23 @@ class OrderControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
         verify(orderService, times(1)).getOrdersList(defaultOffset, defaultLimit);
+    }
+
+    @Test
+    public void invalidPathParamsGetOrdersListTest() throws Exception {
+        // Not valid params
+        String offset = "-10";
+        String limit = "0";
+
+        mockMvc.perform(get("/orders")
+                        .param("offset", offset)
+                        .param("limit", limit))
+                .andExpect(status().isBadRequest())
+                // Expect that controller will throw OrderInvalidRequestParamsException
+                .andExpect(result ->
+                        assertTrue(result.getResolvedException() instanceof OrderInvalidRequestParamsException));
+
+        // getOrderList shouldn't be called
+        verify(orderService, times(0)).getOrdersList(anyInt(), anyInt());
     }
 }
