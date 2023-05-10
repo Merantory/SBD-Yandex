@@ -2,10 +2,13 @@ package com.merantory.YandexSBD.controllers;
 
 import com.merantory.YandexSBD.dto.courier.CourierConverter;
 import com.merantory.YandexSBD.dto.courier.CourierDto;
+import com.merantory.YandexSBD.dto.courier.requests.RequestCreateCourier;
 import com.merantory.YandexSBD.dto.courier.responses.ResponseCourierDto;
+import com.merantory.YandexSBD.dto.courier.responses.ResponseCreateCourier;
 import com.merantory.YandexSBD.models.Courier;
 import com.merantory.YandexSBD.services.CourierService;
 import com.merantory.YandexSBD.util.exceptions.courier.CourierInvalidRequestParamsException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,5 +50,16 @@ public class CourierController {
         CourierDto courierDto = CourierConverter.convertCourierToCourierDto(courier);
 
         return new ResponseEntity<>(courierDto, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<ResponseCreateCourier> saveCourier(@RequestBody @Valid RequestCreateCourier requestCreateCourier) {
+        List<Courier> courierToSaveList = CourierConverter.convertCreateCourierDtoListToCourierList(
+                requestCreateCourier.couriers());
+        List<CourierDto> courierDtoList =
+                CourierConverter.convertCourierListToCourierDtoList(courierService.save(courierToSaveList));
+        ResponseCreateCourier responseCreateCourier = new ResponseCreateCourier(courierDtoList);
+
+        return new ResponseEntity<>(responseCreateCourier, HttpStatus.CREATED);
     }
 }
