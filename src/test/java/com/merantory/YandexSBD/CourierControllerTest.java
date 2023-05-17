@@ -73,4 +73,19 @@ class CourierControllerTest {
 
         verify(courierService, times(1)).getCouriersList(defaultOffset, defaultLimit);
     }
+
+    @Test
+    public void invalidPathParamsGetCouriersListTest() throws Exception {
+        String defaultOffset = "-1";
+        String defaultLimit = "0";
+
+        mockMvc.perform(get("/couriers")
+                        .param("offset", defaultOffset)
+                        .param("limit", defaultLimit))
+                .andExpect(status().isBadRequest())
+                .andExpect(result ->
+                        assertTrue(result.getResolvedException() instanceof CourierInvalidRequestParamsException));
+
+        verify(courierService, times(0)).getCouriersList(anyInt(), anyInt());
+    }
 }
