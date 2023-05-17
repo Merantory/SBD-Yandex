@@ -115,4 +115,34 @@ class CourierControllerTest {
 
         verify(courierService, times(1)).getCourier(anyLong());
     }
+
+    @Test
+    public void saveCourierTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        CreateCourierDto courierDto = new CreateCourierDto();
+        courierDto.setWorkingHours(Set.of("10:00-16:00", "18:00-21:30"));
+        courierDto.setRegions(Set.of(1L, 2L));
+        courierDto.setCourierType(CourierTypeEnum.valueOf("FOOT"));
+
+        RequestCreateCourier requestCreateCourier = new RequestCreateCourier(List.of(courierDto));
+
+        Courier expectedCourier = new Courier();
+        expectedCourier.setCourierId(1);
+        expectedCourier.setWorkingHours(Set.of("10:00-16:00", "18:00-21:30"));
+        expectedCourier.setRegions(Set.of(1L, 2L));
+        expectedCourier.setCourierType(new CourierType(CourierTypeEnum.valueOf("FOOT")));
+
+        when(courierService.save(anyList())).thenReturn(List.of(expectedCourier));
+
+        mockMvc.perform(post("/couriers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestCreateCourier)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.couriers[0].courier_type", equalToCompressingWhiteSpace("FOOT")))
+                .andExpect(jsonPath("$.couriers[0].working_hours", hasItems("10:00-16:00", "18:00-21:30")))
+                .andExpect(jsonPath("$.couriers[0].regions", hasItems(1, 2)));
+
+        verify(courierService, times(1)).save(anyList());
+    }
 }
