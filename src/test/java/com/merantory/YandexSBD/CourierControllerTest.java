@@ -61,4 +61,16 @@ class CourierControllerTest {
                 .setControllerAdvice(CustomGlobalExceptionHandler.class)
                 .build();
     }
+
+    @Test
+    public void getCouriersListTest() throws Exception {
+        int defaultOffset = 0;
+        int defaultLimit = 1;
+
+        mockMvc.perform(get("/couriers"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        verify(courierService, times(1)).getCouriersList(defaultOffset, defaultLimit);
+    }
 }
