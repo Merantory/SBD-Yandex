@@ -219,4 +219,36 @@ class CourierControllerTest {
         verify(courierService, times(1)).getCourier(anyLong());
         verify(courierService, times(1)).setCourierMetaInfoPerDatePeriod(any(), any(), any());
     }
+
+    @Test
+    public void getCourierMetaInfoTest() throws Exception {
+        Courier courier = new Courier();
+        courier.setCourierId(1L);
+        courier.setCourierType(new CourierType(CourierTypeEnum.FOOT));
+
+        Order courierOrder = new Order();
+        courierOrder.setDeliveryCourierId(1L);
+        courierOrder.setId(2L);
+        courierOrder.setWeight(10);
+
+        String startDate = "2023-01-20";
+        String endDate = "2023-01-21";
+
+        when(courierService.getCourier(anyLong())).thenReturn(courier);
+        courier.setCompleteOrders(List.of(courierOrder));
+        when(courierService.setCourierMetaInfoPerDatePeriod(courier,
+                LocalDate.parse(startDate),
+                LocalDate.parse(endDate)))
+                .thenReturn(courier);
+
+        mockMvc.perform(get("/couriers/meta-info/1")
+                        .param("startDate", startDate)
+                        .param("endDate", endDate))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.courier_id").value(courier.getCourierId()))
+                .andExpect(jsonPath("$.courier_type").value(courier.getCourierType().getType().toString()));
+
+        verify(courierService, times(1)).getCourier(anyLong());
+        verify(courierService, times(1)).setCourierMetaInfoPerDatePeriod(any(), any(), any());
+    }
 }
