@@ -164,4 +164,20 @@ class CourierControllerTest {
 
         verify(courierService, times(0)).save(anyList());
     }
+
+    @Test
+    public void getCourierMetaInfoWhenCourierDoesntExistTest() throws Exception {
+        when(courierService.getCourier(anyLong())).thenThrow(CourierNotFoundException.class);
+
+        String startDate = "2023-01-20";
+        String endDate = "2023-01-21";
+
+        mockMvc.perform(get("/couriers/meta-info/1")
+                        .param("startDate", startDate)
+                        .param("endDate", endDate))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourierNotFoundException));
+        verify(courierService, times(1)).getCourier(anyLong());
+        verify(courierService, times(0)).setCourierMetaInfoPerDatePeriod(any(), any(), any());
+    }
 }
