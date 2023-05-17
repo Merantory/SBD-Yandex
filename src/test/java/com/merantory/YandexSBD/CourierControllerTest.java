@@ -88,4 +88,20 @@ class CourierControllerTest {
 
         verify(courierService, times(0)).getCouriersList(anyInt(), anyInt());
     }
+
+    @Test
+    public void getCourierTest() throws Exception {
+        Courier courier = new Courier();
+        courier.setCourierId(1L);
+        courier.setCourierType(new CourierType(CourierTypeEnum.valueOf("FOOT")));
+
+        when(courierService.getCourier(anyLong())).thenReturn(courier);
+
+        mockMvc.perform(get("/couriers/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.courier_id").value(1L));
+
+        verify(courierService, times(1)).getCourier(anyLong());
+    }
 }
