@@ -195,4 +195,28 @@ class CourierControllerTest {
         verify(courierService, times(0)).getCourier(anyLong());
         verify(courierService, times(0)).setCourierMetaInfoPerDatePeriod(any(), any(), any());
     }
+
+    @Test
+    public void getCourierMetaInfoForCourierWithoutAnyOrdersTest() throws Exception {
+        Courier courier = new Courier();
+        courier.setCourierId(1L);
+
+        String startDate = "2023-01-20";
+        String endDate = "2023-01-21";
+
+        when(courierService.getCourier(anyLong())).thenReturn(courier);
+        when(courierService.setCourierMetaInfoPerDatePeriod(courier,
+                LocalDate.parse(startDate),
+                LocalDate.parse(endDate)))
+                .thenThrow(OrderNotFoundException.class);
+
+        mockMvc.perform(get("/couriers/meta-info/1")
+                        .param("startDate", startDate)
+                        .param("endDate", endDate))
+                .andExpect(status().isNotFound())
+                .andExpect(result ->
+                        assertTrue(result.getResolvedException() instanceof OrderNotFoundException));
+        verify(courierService, times(1)).getCourier(anyLong());
+        verify(courierService, times(1)).setCourierMetaInfoPerDatePeriod(any(), any(), any());
+    }
 }
