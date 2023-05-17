@@ -145,4 +145,23 @@ class CourierControllerTest {
 
         verify(courierService, times(1)).save(anyList());
     }
+
+    @Test
+    public void saveInvalidCourierTest() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        CreateCourierDto courierDto = new CreateCourierDto();
+        courierDto.setWorkingHours(Set.of("10:00-09:00", "18:00-21:30")); // Invalid value
+        courierDto.setRegions(Set.of(-1L, 2L)); // Invalid value
+        courierDto.setCourierType(CourierTypeEnum.valueOf("FOOT"));
+
+        RequestCreateCourier requestCreateCourier = new RequestCreateCourier(List.of(courierDto));
+
+        mockMvc.perform(post("/couriers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestCreateCourier)))
+                .andExpect(status().isBadRequest());
+
+        verify(courierService, times(0)).save(anyList());
+    }
 }
