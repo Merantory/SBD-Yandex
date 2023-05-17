@@ -180,4 +180,19 @@ class CourierControllerTest {
         verify(courierService, times(1)).getCourier(anyLong());
         verify(courierService, times(0)).setCourierMetaInfoPerDatePeriod(any(), any(), any());
     }
+
+    @Test
+    public void getCourierMetaInfoWithInvalidDatesTest() throws Exception {
+        String startDate = "2023-01-23"; // startDate is after endDate = invalid
+        String endDate = "2023-01-21";
+
+        mockMvc.perform(get("/couriers/meta-info/1")
+                        .param("startDate", startDate)
+                        .param("endDate", endDate))
+                .andExpect(status().isBadRequest())
+                .andExpect(result ->
+                        assertTrue(result.getResolvedException() instanceof CourierMetaInfoInvalidDateException));
+        verify(courierService, times(0)).getCourier(anyLong());
+        verify(courierService, times(0)).setCourierMetaInfoPerDatePeriod(any(), any(), any());
+    }
 }
