@@ -104,4 +104,15 @@ class CourierControllerTest {
 
         verify(courierService, times(1)).getCourier(anyLong());
     }
+
+    @Test
+    public void getNotExistCourierTest() throws Exception {
+        when(courierService.getCourier(anyLong())).thenThrow(CourierNotFoundException.class);
+
+        mockMvc.perform(get("/couriers/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourierNotFoundException));
+
+        verify(courierService, times(1)).getCourier(anyLong());
+    }
 }
